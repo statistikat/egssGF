@@ -1,0 +1,141 @@
+usethis::create_package("/data/home/froehlich/egss_gf")
+
+devtools::check()
+
+usethis::use_roxygen_md()
+usethis::edit_file("R/loadEGSS.R")
+usethis::edit_file("R/screenData.R")
+usethis::edit_file("R/loadNA.R")
+usethis::edit_file("R/imputeTS.R")
+
+usethis::use_data(NatAcc)
+usethis::use_data(egssBas)
+
+usethis::use_package("data.table")
+usethis::use_package("forecast")
+usethis::use_package("ggplot2")
+
+#library(data.table)
+#mlauf <- mountSTAT::mountWinShare(server = "DatenREG",share = "REG_METHODIK",mountpunkt = "mmm0")
+#setwd(paste0(mlauf,"/Froehlich/J2018/EGSS/EGSS/FlatFiles"))
+#input <- list.files()
+
+#x <- input
+#aa <- fread(x[9])
+
+#dat2016 <- aa
+#usethis::use_data(dat2016)
+
+
+devtools::document()
+
+# to check
+test <- loadEGSS(system.file("data.txt", package = "egssGF"))
+test[time==2015 & geo=="AT" & indic_pi=="PROD" & nace_r2=="TOTAL" & ceparema=="TOTAL",]
+# OWN_USE missing but should be zero?
+
+
+# Data import
+# 1. Upload data Set
+# 2. Read data Set
+# 3. Manipulate data Set
+library(data.table)
+mlauf <- mountSTAT::mountWinShare(server = "DatenREG",share = "REG_METHODIK",mountpunkt = "mmm0")
+natAccEXP <- fread(file=paste0(mlauf,"/froehlich/j2019/egss/na_daten/naio_10_cp1700_1_Data.csv"))
+names(natAccEXP) <- tolower(names(natAccEXP))
+natAccEXP <- natAccEXP[induse=="Exporte",]
+natAccEXP[,":=" (value=ifelse(value==":",NA,ifelse(value=="",NA,value)))]
+natAccEXP[,":=" (value=as.numeric(value),indic_pi="EXP")]
+unique(natAccEXP$prod_na)
+
+
+# Data manipulation for national account exports:
+
+natAccEXP <- fread(file=paste0(mlauf,"/froehlich/j2019/egss/na_daten/naio_10_cp1700_1_Data.csv"))
+names(natAccEXP) <- tolower(names(natAccEXP))
+natAccEXP <- natAccEXP[induse=="Exporte",]
+natAccEXP[,":=" (value=ifelse(value==":",NA,ifelse(value=="",NA,value)))]
+natAccEXP[,":=" (value=as.numeric(value))]
+natAccEXP[,":=" (indic_pi="EXP")]
+natAccEXP <- natAccEXP[,.(time,geo,indic_pi,prod_na,value)]
+natAccEXP <- natAccEXP[!prod_na=="P2_ADJ",]
+natAccEXP[,":=" (help=substr(prod_na,5,nchar(prod_na)))]
+natAccEXP[,":=" (help=ifelse(prod_na=="TOTAL","TOTAL",help))]
+natAccEXP[,":=" (letter=ifelse(help=="TOTAL","TOTAL",substr(help,1,1)))]
+natAccEXP1 <- natAccEXP[,lapply(.SD,sum,na.rm=TRUE),by=c("geo","time","indic_pi","letter"),.SDcols="value"]
+natAccEXP1 <- natAccEXP1[letter %in% c("A","C","E","G","H","J","K","L","M","N","Q","R","S"),]
+
+natAccEXP <- natAccEXP[substr(help,1,1) %in% c("B","C","D","E","F","I","M","O","P","T","U"),]
+
+c16 <- natAccEXP[help %in% c("C16","C17","C18"), .(value=sum(value,na.rm=TRUE),nace_r2="C16-C18"), by=.(time,geo,indic_pi)]
+c22 <- natAccEXP[help %in% c("C22","C23"), .(value=sum(value,na.rm=TRUE),nace_r2="C22_C23"), by=.(time,geo,indic_pi)]
+c24 <- natAccEXP[help %in% c("C24","C25"), .(value=sum(value,na.rm=TRUE),nace_r2="C24_C25"), by=.(time,geo,indic_pi)]
+c29 <- natAccEXP[help %in% c("C29","C30"), .(value=sum(value,na.rm=TRUE),nace_r2="C29_C30"), by=.(time,geo,indic_pi)]
+c31 <- natAccEXP[help %in% c("C31_32","C33"), .(value=sum(value,na.rm=TRUE),nace_r2="C31-C33"), by=.(time,geo,indic_pi)]
+m73 <- natAccEXP[help %in% c("M74_75","M73"), .(value=sum(value,na.rm=TRUE),nace_r2="M73-M75"), by=.(time,geo,indic_pi)]
+
+natAccEXP <- natAccEXP[!help %in% c("C16","C17","C18","C22","C23","C24","C25","C29","C30",
+                                    "C31_32","C33","M74_75","M73"),]
+natAccEXP[,":=" (nace_r2=help,prod_na=NULL,help=NULL,letter=NULL)]
+natAccEXP2 <- natAccEXP1[,.(time,geo,indic_pi,value,nace_r2=letter)]
+
+natAccEXP0 <- rbind(natAccEXP,natAccEXP2,c16,c22,c24,c29,c31,m73)
+
+# Exports for missing Countries
+dk <- natAcc1[geo=="DK" & indic_pi=="PROD",]
+dk[,":=" (indic_pi="EXP",value=NA)]
+eu27 <- natAcc1[geo=="EU27_2019" & indic_pi=="PROD",]
+eu27[,":=" (indic_pi="EXP",value=NA)]
+fi <- natAcc1[geo=="FI" & indic_pi=="PROD",]
+fi[,":=" (indic_pi="EXP",value=NA)]
+mt <- natAcc1[geo=="MT" & indic_pi=="PROD",]
+mt[,":=" (indic_pi="EXP",value=NA)]
+nl <- natAcc1[geo=="NL" & indic_pi=="PROD",]
+nl[,":=" (indic_pi="EXP",value=NA)]
+ro <- natAcc1[geo=="RO" & indic_pi=="PROD",]
+ro[,":=" (indic_pi="EXP",value=NA)]
+
+natAcc2 <- rbind(natAcc1,dk)
+natAcc2 <- rbind(natAcc2,eu27)
+natAcc2 <- rbind(natAcc2,fi)
+natAcc2 <- rbind(natAcc2,mt)
+natAcc2 <- rbind(natAcc2,nl)
+natAcc2 <- rbind(natAcc2,ro)
+natAcc2
+
+
+
+
+
+# Plots
+
+
+nLevel1 <- nLev[[1]][[1]]
+nLevel2 <- nLev[[2]]
+cLevel1 <- cLev[[1]]
+cLevel2 <- cLev[[1]]
+aggLev <- 1
+
+#------------------------------------------------------------------------------------------------------------
+nLev <- list(l0="TOTAL",l1=LETTERS[1:21])
+cLev <- list(l0="TOTAL",l1=c("TOT_CEPA","TOT_CREMA"),l2=unique(x$ceparema)[1:12])
+
+
+# Top-Aggregat Extrapolation
+x00 <- dat16a[nace_r2=="TOTAL" & ty=="TOT_EGSS" & ceparema=="TOTAL",]
+x00 <- extraPol(x00)
+# Merge with Base Data and completion of Values
+setkey(x00,yyyy,code)
+setkey(dat16a,yyyy,code)
+inp1 <- merge(dat16a,x00,all.x=TRUE)
+inp1[,":=" (obs_value_rel=ifelse(!is.na(obs_valueEX),obs_valueEX,obs_value_rel))]
+inp1[,":=" (obs_value=ifelse(!is.na(obs_valueEX),obs_valueEX*rev_val,obs_value),obs_valueEX=NULL)]
+# Input data-set for second aggregation step
+
+# Step2
+stufe2 <- iterFit(inp1,1,nLev[[1]][[1]],nLev[[2]],cLev[[1]],cLev[[1]])
+setkey(inp1,time,code)
+setkey(stufe2,time,code)
+inp2 <- merge(inp1,stufe2,all.x=TRUE)
+inp2[,":=" (obs_value=ifelse(!is.na(obs_value2),obs_value2,obs_value),obs_value2=NULL)]
+stufe3 <- iterFit(dat1)

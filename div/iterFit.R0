@@ -1,0 +1,162 @@
+#' Iterative fitting of extrapolated and imputed data to respective available aggregate numbers
+#'
+#'
+#' @param x EGSS-data set enriched with national account data (output of loadNA)
+#' @param aggLev which Variable has to be aggregated
+#'
+#'        possible values:
+#'
+#'        + 1 - Aggregation over NACE-levels
+#'        + 2 - Aggregation over Ceparema levels
+#' @param nLevel1 Top-Level for NACE
+#' @param nLevel2 Bottom-Level for NACE
+#' @param cLevel1 Top-Level for Ceparema
+#' @param cLevel2 Bottom-Level for Ceparema
+#' @return Data set for a specific aggregation level with original reported data and corrected estimated values
+#'         which are close to the original reported data.
+#'
+#' @examples
+#' data("dat_egssBas")
+#' data("natAcc")
+#' datEx <- loadEGSS(dat_egssBas)
+#' datEx1 <- loadNA(natAcc,datEx,2016)
+#' topLevel <- iterFit(datEx1,aggLev = 1)
+#'
+#'
+#' @import data.table
+#' @export
+#'
+
+iterFit <- function(x, aggLev, lc = c(6,0,0), nLevel1 = "TOTAL", nLevel2 = "TOTAL",
+                      cLevel1 = "TOTAL", cLevel2 = "TOTAL"){
+
+  x00 <- x[nace_r2 %in% nLevel1 & ty=="TOT_EGSS" & ceparema %in% cLevel1,]
+  nobs0 <- nrow(x00[is.na(obs_value),])
+  cat(nobs0," Observations are missing in the Top Level Hierarchy","\n")
+  x00 <- extraPol(x00)
+  setkey(x00,yyyy,code)
+  setkey(x,yyyy,code)
+  x00 <- merge(x00,x,all.x=TRUE)
+  x00[,":=" (obs_value=ifelse(!is.na(obs_valueEX),obs_valueEX*rev_val,obs_value),
+             lcode=paste0(substr(code,1,lc[1]),"_",substr(code,lc[2],lc[3])),obs_valueEX=NULL)]
+  setkey(x00,yyyy,lcode)
+  nobs1 <- nrow(x00[is.na(obs_value),])
+  cat(nobs0-nobs1," Observations were generated in this step (",nobs1,"Values still missing)","\n")
+  l1 <- length(nLevel2)
+  l2 <- length(cLevel2)
+  gn <- l1*l2
+  pb <- txtProgressBar(min = 0, max = gn, style=3)
+  tt <- 0; nobs2 <- 0; nobs3 <- 0;
+  cat("\n")
+  for(ii in 1:l1){
+    for(jj in 1:l2){
+      tt <- tt+1
+      xx <- x[nace_r2==nLevel2[[ii]] & ty=="TOT_EGSS" & ceparema==cLevel2[[jj]],]
+      nobs2 <- sum(nobs2,nrow(xx[is.na(obs_value),]))
+      xx01 <- extraPol(xx)
+      ergVar <- paste0("val_",nLevel2[[ii]],"_",cLevel2[[jj]])
+      oriVar <- paste0("ori_",nLevel2[[ii]],"_",cLevel2[[jj]])
+      xx01[,":=" (lcode=paste0(substr(code,1,lc[1]),"_",substr(code,lc[2],lc[3])))]
+      xx01[,c(ergVar,"obs_valueEX"):=.(obs_valueEX,NULL)]
+      yy01 <- x[,.(yyyy,code,orig,rev_val)]
+      yy01[,c(oriVar,"orig"):=.(orig,NULL)]
+      setkey(yy01,yyyy,code)
+      setkey(xx01,yyyy,code)
+      xx01 <- merge(xx01,yy01,all.x=TRUE)
+      xx01 <- xx01[, c(ergVar):=get(ergVar)*rev_val]
+      xx01 <- xx01[, ":=" (rev_val=NULL,code=NULL)]
+      setkey(xx01,yyyy,lcode)
+      nobs3 <- sum(nobs3,nrow(xx01[is.na(get(ergVar)),]))
+      x00 <- merge(x00,xx01,all.x=TRUE)
+      setTxtProgressBar(pb, tt)
+    }
+  }
+  cat("\n")
+  cat("\n",nobs2-nobs3," Observations from ",nobs2," missing Observations have been generated in this step.","\n")
+  x00Agg <- x00[,.(yyyy,lcode,obs_value,orig)]
+  x00b <- melt(x00,id=c(2,1),measure=patterns("^val", "^ori_"))
+  x00b1 <- x00b[,lapply(.SD,sum,na.rm=TRUE),by=c("lcode","yyyy","value2"),.SDcols=c("value1")]
+  x00b2 <- x00b[!is.na(value1),.N,by=c("lcode","yyyy","value2")]
+  x00a <- merge(x00b1,x00b2)
+  x00a <- dcast(x00a,yyyy+lcode~value2,value.var=c("value1","N"))
+  setkey(x00Agg,yyyy,lcode)
+  setkey(x00a,yyyy,lcode)
+  x00c <- merge(x00Agg,x00a)
+  #colnames(x00c) <- c("yyyy","lcode","obs_value","aggOrig","f","t")
+
+
+  x00c[, ":=" (factorNA = 1, factorOri = 1)]
+  x00c[is.na(value1_FALSE) & is.na(value1_TRUE), ":=" (factorNA = 0, factorOri = 0)]
+  x00c[is.na(value1_FALSE) & value1_TRUE > 0, ":=" (factorNA = 0,
+                                                    factorOri = ifelse(orig==TRUE, obs_value/value1_TRUE, 1))]
+  #x00c[is.na(value1_FALSE) & value1_TRUE > 0, ":=" (factorNA = 0,
+  #                                                  factorOri = ifelse(orig==TRUE & obs_value > 0, obs_value/value1_TRUE, 1))]
+  x00c[is.na(value1_FALSE) & value1_TRUE == 0, ":=" (factorNA = 0, factorOri = 1)]
+  x00c[value1_FALSE == 0 & value1_TRUE == 0, ":=" (factorNA = 1, factorOri = 1)]
+  x00c[value1_FALSE == 0 & is.na(value1_TRUE), ":=" (factorNA = 1, factorOri = 0)]
+  x00c[value1_FALSE == 0 & value1_TRUE > 0, ":=" (factorNA = 1,
+                                                  factorOri = ifelse(orig==TRUE, obs_value/value1_TRUE, 1))]
+  #x00c[value1_FALSE == 0 & value1_TRUE > 0, ":=" (factorNA = 1,
+  #                                                factorOri = ifelse(orig==TRUE & obs_value > 0, obs_value/value1_TRUE, 1))]
+  #
+  x00c[value1_FALSE > 0 & value1_TRUE > 0 & orig == TRUE, ":=" (factorNA = ifelse(value1_TRUE>obs_value,0,(obs_value-value1_TRUE)/value1_FALSE),
+                                                 factorOri = ifelse(value1_TRUE>obs_value,obs_value/value1_TRUE,1))]
+  #
+  x00c[value1_FALSE > 0 & value1_TRUE > 0 & orig == FALSE, ":=" (factorNA = ifelse(value1_TRUE>obs_value,0,(obs_value-value1_TRUE)/value1_FALSE),
+                                                                factorOri = 1)]
+  # alternatively
+  #x00c[value1_FALSE > 0 & value1_TRUE > 0 & orig == FALSE, ":=" (factorNA = (obs_value-value1_TRUE)/value1_FALSE,
+  #                                                               factorOri = 1)]
+  x00c[value1_FALSE > 0 & is.na(value1_TRUE), ":=" (factorNA = ifelse(!is.na(obs_value),obs_value/value1_FALSE,1),
+                                                    factorOri = 0)]
+  x00c[value1_FALSE > 0 & value1_TRUE == 0, ":=" (factorNA = ifelse(!is.na(obs_value),obs_value/value1_FALSE,1),
+                                                  factorOri = 1)]
+
+  # Output of maximal Adjustment factors for manual control
+  maxAdjNA <- x00c[,.(yyyy,lcode,factorNA)]
+  maxAdjOri <- x00c[,.(yyyy,lcode,factorOri)]
+
+  cat("\n","\n","Maximal Adjustment Factors for estimated Values","\n")
+  print(maxAdjNA[order(maxAdjNA$factorNA,decreasing = TRUE)[1:5]])
+  cat("\n","Maximal Adjustment Factors for reported Values","\n")
+  print(maxAdjOri[order(maxAdjOri$factorOri,decreasing = TRUE)[1:5]])
+
+  x00c <- x00c[,.(yyyy,lcode,factorNA,factorOri)]
+  setkey(x00c,yyyy,lcode)
+  setkey(x00b,yyyy,lcode)
+  x10 <- merge(x00b,x00c,all.x=TRUE)
+  ll <- nrow(x10)
+  variable1 <- rep(1:length(nLevel2),each=length(cLevel2))
+  variable2 <- rep(1:length(cLevel2),length(nLevel2))
+  x10[,":=" (variable1 = rep(variable1,(ll/length(variable1))), variable2 = rep(variable2, (ll/length(variable2))))]
+  x10[,":=" (obs_value1=ifelse(value2==TRUE,value1*factorOri,value1*factorNA),value1=NULL,value2=NULL)]
+  if(aggLev==0){
+    x10[,":=" (factorNA=NULL,factorOri=NULL,variable=NULL,nace_r2=nLevel2[variable1],ceparema=cLevel2[variable2])]
+  } else if (aggLev==1){
+    x10[,":=" (factorNA=NULL,factorOri=NULL,variable=NULL,nace_r2=nLevel2[variable],ceparema=cLevel2)]
+  } else{
+    x10[,":=" (factorNA=NULL,factorOri=NULL,variable=NULL,nace_r2=nLevel2,ceparema=cLevel2[variable])]
+  }
+  y <- copy(x)
+  y[,":=" (lcode=paste0(substr(code,1,lc[1]),"_",substr(code,lc[2],lc[3])))]
+  setkey(x10,yyyy,lcode,nace_r2,ceparema)
+  setkey(y,yyyy,lcode,nace_r2,ceparema)
+  y <- merge(y,x10)
+  y[,":=" (obs_value2=ifelse(!is.na(obs_value1),obs_value1,obs_value))]
+  y <- y[,.(yyyy,code,obs_value2)]
+  ##### Test
+  #y[,":=" (lcode=paste0(substr(code,1,lc[1]),"_",substr(code,lc[2],lc[3])))]
+  #yAgg <- y[,obs_value3:=sum(obs_value2),by=lcode]
+  #yAgg <- y[,lapply(.SD,sum,na.rm=TRUE),by=.(yyyy,lcode),.SDcols="obs_value2"]
+  #setkey(yAgg,yyyy,lcode)
+  #setkey(x00Agg,yyyy,lcode)
+  #Agg <- merge(x00Agg,yAgg,all.x=TRUE)
+  ##### Ende Test
+  setkey(y,yyyy,code)
+  setkey(x,yyyy,code)
+  y0 <- merge(x,y,all.x=TRUE)
+  y0[,":=" (obs_value=ifelse(!is.na(obs_value2),obs_value2,obs_value))]
+  y0[,":=" (obs_value_rel=obs_value/rev_val, obs_value2 = NULL)]
+  return(y0[])
+}
+

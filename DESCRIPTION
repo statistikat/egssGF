@@ -1,0 +1,32 @@
+Package: egssGF
+Title: Compilation and Gap Filling for Environmental Goods and Services
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Markus",
+           family = "Fröhlich",
+           role = c("aut", "cre"),
+           email = "Markus.Froehlich@statistik.gv.at")
+Description: Program to load data for Environmental goods and services for all EU-countries. Missing
+               data are essentially completed by logical edits and regression methods.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.1
+Imports: 
+    data.table,
+    forecast,
+    ggplot2,
+    plotly,
+    formattable,
+    stats,
+    utils
+Suggests: 
+    BiocStyle,
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0)
+VignetteBuilder: knitr
+Depends: R (>= 2.10)
+URL:  https://github.com/statistikat/egssGF
+BugReports: https://github.com/statistikat/egssGF/issues
