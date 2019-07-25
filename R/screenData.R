@@ -38,9 +38,9 @@
 #'         ggplot2
 #' @importFrom plotly ggplotly
 #' @export
-screenData <- function(x,g=c("AT", "BE", "BG", "CH", "CZ", "DE","DK", "EE", "EL", "ES", "FI",
-                             "FR", "HR", "HU", "IE", "IT", "LT","LU", "LV", "NL", "PL", "PT",
-                             "RO", "SE", "SI", "SK", "TR", "UK"),
+screenData <- function(x,g=c("AT", "BE", "BG", "CY", "CZ", "DE","DK", "EE", "EL", "ES", "FI",
+                             "FR", "HR", "HU", "IE", "IT", "LT","LU", "LV", "MT"," NL", "PL",
+                             "PT", "RO", "SE", "SI", "SK", "UK"),
                          v=c("PROD","VA","EXP","EMP"),
                          per="ALL",
                          n2=c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
