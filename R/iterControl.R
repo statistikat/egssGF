@@ -29,24 +29,24 @@ iterControl <- function(x){
     a[[1]] <- x[ceparema == "TOTAL" & !(nace_r2=="TOTAL"), lapply(.SD,sum,na.rm=TRUE),
            by=c("geo", "yyyy", "indic_pi"), .SDcols = c("obs_value")]
     a[[2]] <- x[ceparema == "TOTAL" & nace_r2 == "TOTAL",
-            mget(c("geo","yyyy","indic_pi","obs_value"))]
+            mget(c("geo", "yyyy", "indic_pi", "obs_value"))]
     # agg2
     a[[3]] <- x[!(substr(ceparema,1,3) =="TOT") & nace_r2=="TOTAL", lapply(.SD,sum,na.rm=TRUE),
            by=c("geo", "yyyy", "indic_pi"), .SDcols = c("obs_value")]
     a[[4]] <- x[ceparema == "TOTAL" & nace_r2 == "TOTAL",
-            mget(c("geo","yyyy","indic_pi","obs_value"))]
+            mget(c("geo", "yyyy", "indic_pi", "obs_value"))]
     # TOT_CEPA and TOT_CREMA to TOTAL by NACE
     a[[5]] <- x[ceparema %in% c("TOT_CEPA","TOT_CREMA") & !(nace_r2 %in% c("TOTAL")),
            lapply(.SD,sum,na.rm=TRUE),by=c("geo","yyyy","indic_pi","nace_r2"),.SDcols=c("obs_value")]
     a[[6]] <- x[ceparema == "TOTAL" & !(nace_r2 %in% c("TOTAL")),
-            mget(c("geo","yyyy","indic_pi","nace_r2","obs_value"))]
+            mget(c("geo", "yyyy", "indic_pi", "nace_r2", "obs_value"))]
     # Cepa1 to Cepa9 to TOT_CEPA
-    a[[7]] <- x[ceparema %in% c("CEPA1","CEPA2","CEPA3","CEPA4","CEPA5","CEPA6","CEPA7-9") &
+    a[[7]] <- x[ceparema %in% c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9") &
              !(nace_r2 %in% c("TOTAL")), lapply(.SD,sum,na.rm=TRUE),by=c("geo","yyyy","indic_pi","nace_r2"),
               .SDcols=c("obs_value")]
     a[[8]] <- x[ceparema=="TOT_CEPA" & !(nace_r2 %in% "TOTAL"),  mget(c("geo","yyyy","indic_pi","nace_r2","obs_value"))]
     # Crema10 to Crema16 to TOT_CREMA
-    a[[9]] <- x[ceparema %in% c("CREMA10","CREMA11","CREMA13","CREMA14","CREMA12_15_16") &
+    a[[9]] <- x[ceparema %in% c("CREMA10", "CREMA11", "CREMA13A", "CREMA13B", "CREMA13C", "CREMA14", "CREMA12_15_16") &
              !(nace_r2 %in% c("TOTAL")), lapply(.SD,sum,na.rm=TRUE),by=c("geo","yyyy","indic_pi","nace_r2"),
              .SDcols=c("obs_value")]
     a[[10]] <- x[ceparema=="TOT_CREMA" & !(nace_r2 %in% "TOTAL"),  mget(c("geo","yyyy","indic_pi","nace_r2","obs_value"))]

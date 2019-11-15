@@ -27,9 +27,9 @@
 plotData <- function(x,y,geoC="ALL",varC="PROD",nC="TOTAL",cC="TOTAL"){
   nace_r2 <- ty <- ceparema <- . <- yyyy <- code <- obs_value <- geo <- indic_pi <- NULL
   if(geoC=="ALL"){
-    geoC <- c("AT", "BE", "BG", "CH", "CZ", "DE", "DK", "EE", "EL", "ES",
-            "FI", "FR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "NL", "PL",
-            "PT", "RO", "SE", "SI", "SK", "TR", "UK")
+    geoC <- c("AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES",
+            "FI", "FR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL",
+            "PT", "RO", "SE", "SI", "SK", "UK")
   }
 
   p0 <- x[nace_r2 %in% nC & ceparema %in% cC,]

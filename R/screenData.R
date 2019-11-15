@@ -46,8 +46,8 @@ screenData <- function(x,g=c("AT", "BE", "BG", "CY", "CZ", "DE","DK", "EE", "EL"
                          n2=c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
                               "N", "O", "P", "Q", "R", "S", "T","U"),
                          cep=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7",
-                               "CEPA8", "CEPA9", "CREMA10", "CREMA11", "CREMA12", "CREMA13",
-                               "CREMA14", "CREMA15", "CREMA16"),
+                               "CEPA8", "CEPA9", "CREMA10", "CREMA11", "CREMA12", "CREMA13A",
+                               "CREMA13B", "CREMA13C", "CREMA14", "CREMA15", "CREMA16"),
                          t1=c("ANC", "MKT", "NMKT", "OWN_USE"),
                          p=1,val=1,ia=FALSE){
   indic_pi <- yyyy <- geo <- ty <- nace_r2 <- ceparema <- obs_value <- V1 <- NULL

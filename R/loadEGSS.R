@@ -2,45 +2,58 @@
 #'
 #' Loads EGSS Base File, completes and harmonises data file over periods.
 #'
-#' 1. Input File has to be available in the "MDT"-flat format
-#' 2. Standardisation of "ty"-Variable:
+#' 1. Conversion of national currency values to Euro values
+#' 2. Input File has to be available in the "MDT"-flat format
+#' 3. Standardisation of "ty"-Variable:
 #'       * create structure for "ty" according to requirements 2013 (levels: MKT, C_REP and ES_CS)
 #'       * add a Rest Category: Rest=MKT-C_REP-ES_CS
 #'       * transform data structure for periods before 2013 to this very structure, i.e.
 #'              + C_REP=GDA+TCI (if both available "old" C_REP to delete)
 #'              + Rest=GDC+TCE
 #'       * Treatment of NAs (e.g. GDA=200, TCI=NA; Sum=200 or NA)
-#' 3. Transfer "Basic Structure" to all Countries and Years (34.916 rows)
+#' 4. Transfer "Basic Structure" to all Countries and Years (34.916 rows)
 #'      *  4 variables (Production,Value Added,Employment and Exports)
 #'      * 43 nace-codes (Nace-2digit levels, Nace-divisions and Totals)
 #'      * 29 Ceparema codes (with aggregates)
 #'      * 8 ty-codes and 4 ty-codes respectively (indic_pi="EXP")
-#' 4. Cells with Zeros and obs_status="L" (not applicable) are set to NA
+#' 5. Cells with Zeros and obs_status="L" (not applicable) are set to NA
+#' 6. Creation of a variable **orig** indicating if the observation value 
+#' (obs_value) has been reported (orig=TRUE) This means that obs_value is 
+#' other than missing. (all zeroes are taken as reported). If the variable 
+#' obs_value is missing than orig is set to FALSE.
 #'
 #' @param x R Data Table (EGSS Basis File in Flat Format)
+#' @param y Currency transformation rates
 #' @return Completed EGSS-Data Matrix
 #'
-#' @examples loadEGSS(dat_egssBas)
+#' @examples loadEGSS(dat_egssBas, currency2018)
 #' @import data.table
 #' @export
-loadEGSS <- function(x){
+loadEGSS <- function(x, y){
   ty <- . <- obs_value <- geo <- time <- nace_r2 <- ceparema <- indic_pi <- obs_status <- obs_conf <- NULL
   obs_comment <- obs_gen <- yyyy <- unit.x <- obs_value.x <- obs_value.y <- obs_status.x <- NULL
   obs_conf.x <- obs_comment.x <- orig <- NULL
 
+  # Conversion of national currency to Euro
+  setkey(x, geo, time)
+  setkey(y, geo, time)
+  x0 <- merge(x, y, all.x = TRUE)
+  x0[indic_pi == "EMP", rate := 1]
+  x0[, ":=" (obs_value = ifelse(is.na(rate), obs_value, obs_value/rate))]
+  #-----------------------------------------------------------------------------
   # Completion of Dataset                                                                          Start(1)
   #--------------------------------------------------------------------------------------------------------
   # (1)  Transformation of Levels "GDA" and "TCI" to "C_REP" - is NA if one of the two levels=NA.
   #      "obs_comment" is set to "generated".
 
-  aa <- x[any(ty %in% c("GDA","TCI")),.(obs_value=obs_value[ty=="GDA"]+obs_value[ty=="TCI"]),
-            by=.(geo,time,nace_r2,ceparema,indic_pi)]
+  aa <- x0[any(ty %in% c("GDA","TCI")),.(obs_value=obs_value[ty == "GDA"] + obs_value[ty == "TCI"]),
+            by=.(geo, time, nace_r2, ceparema, indic_pi)]
   aa[,":=" (ty="C_REP",unit="",obs_status="",obs_conf="",obs_comment="generated",obs_gen="harmon")]
   aa <- aa[,.(nace_r2,ceparema,indic_pi,ty,unit,geo,time,obs_value,obs_status,obs_conf,obs_comment,obs_gen)]
 
   setkey(aa,geo,time,nace_r2,ceparema,indic_pi,ty)
-  setkey(x,geo,time,nace_r2,ceparema,indic_pi,ty)
-  dat <- merge(x,aa,all.x=TRUE)
+  setkey(x0,geo,time,nace_r2,ceparema,indic_pi,ty)
+  dat <- merge(x0,aa,all.x=TRUE)
   dat[,":=" (yyyy = time, time = NULL)]
   dat <- dat[,.(geo,yyyy,nace_r2,ceparema,indic_pi,ty,unit=unit.x,obs_value=ifelse(is.na(obs_value.x),obs_value.y,obs_value.x),
                 obs_status=obs_status.x,obs_conf=obs_conf.x,obs_comment=obs_comment.x,obs_gen)]

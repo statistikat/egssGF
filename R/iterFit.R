@@ -50,7 +50,7 @@
 
 iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="TOTAL",
                     cLevel1="TOTAL"){
-  #x <- copy(agg8)
+  #x <- copy(agg6)
   nace_r2 <- ceparema <- lcode <- code <- value <- orig <- . <- yyyy <- obs_value <- value_FALSE <- NULL
   value_TRUE <- N_FALSE <- N_TRUE <- sumRep <- sumEst <- factorEst <- factorRep <- korrObsV <- NULL
   obs_value.x <- obs_value.y <- v1 <- v2 <- oVal <- geo <- indic_pi <- ty <- obs_status <- NULL
@@ -61,7 +61,7 @@ iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="
   x01[,":=" (value=ifelse(value<0 & orig==FALSE,0.0001,value))]
   x01[,":=" (value=ifelse(value<0 & !(substr(lcode,4,6)=="VAD"),0.0001,value))]
 
-  x01[,":=" (orig=ifelse(abs(value)<0.0002,FALSE,orig))]
+  #x01[,":=" (orig=ifelse(abs(value)<0.0002,FALSE,orig))]
   x01a <- x01[,lapply(.SD,sum,na.rm=TRUE),by=c("lcode","yyyy","orig"),.SDcols=c("value")]
   x01b <- x01[!is.na(value),.N,by=c("lcode","yyyy","orig")]
   x02 <- merge(x01a,x01b)

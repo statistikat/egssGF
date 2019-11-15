@@ -28,7 +28,8 @@ genConv <- function(x,n){
     agg2b <- iterFit(agg2a,z=c("ceparema","TOT_CEPA"),lc=c(6,0,0), cLevel=c("TOT_CEPA"),
                      cLevel1=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9"))
     agg2c <- iterFit(agg2b,z=c("ceparema","TOT_CREMA"),lc=c(6,0,0), cLevel=c("TOT_CREMA"),
-                     cLevel1=c("CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16"))
+                     cLevel1=c("CREMA10", "CREMA11", "CREMA13A", "CREMA13B", "CREMA13C",
+                               "CREMA14", "CREMA12_15_16"))
     agg3 <- iterFit(agg2c,z = c("ceparema","TOTAL"), nLevel=LETTERS[1:21], nLevel1=LETTERS[1:21],
                     cLevel1=c("TOT_CEPA", "TOT_CREMA"))
     agg4 <- iterFit(agg3,z = c("nace_r2","TOTAL"),lc=c(6,15,17),nLevel1=LETTERS[1:21],
@@ -38,12 +39,14 @@ genConv <- function(x,n){
                     cLevel1=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9"))
     agg6 <- iterFit(agg5,z=c("ceparema","TOT_CREMA"), nLevel=LETTERS[1:21],nLevel1=LETTERS[1:21],
                     cLevel=c("TOT_CREMA"),
-                    cLevel1=c("CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16"))
+                    cLevel1=c("CREMA10", "CREMA11", "CREMA13A", "CREMA13B", "CREMA13C", "CREMA14", "CREMA12_15_16"))
     agg7 <- iterFit(agg6,z=c("nace_r2","TOTAL"),lc=c(6,15,17),nLevel1=LETTERS[1:21],
                     cLevel=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9","TOT_CEPA",
-                             "CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16","TOT_CREMA"),
+                             "CREMA10", "CREMA11", "CREMA13A", "CREMA13B", "CREMA13C", "CREMA14", 
+                             "CREMA12_15_16","TOT_CREMA"),
                     cLevel1=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9","TOT_CEPA",
-                              "CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16","TOT_CREMA"))
+                              "CREMA10", "CREMA11", "CREMA13A", "CREMA13B", "CREMA13C", "CREMA14", 
+                              "CREMA12_15_16","TOT_CREMA"))
     setTxtProgressBar(pb, ii)
   }
   cat(" ","\n")
