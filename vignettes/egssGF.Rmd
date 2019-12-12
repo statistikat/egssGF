@@ -46,8 +46,8 @@ agencies, non-profit organisations and the research community.
 # Data sets
 The program needs three input files for each run:
 
-1. EGSS data with periods starting in 2010 and ending one year before the actual end ($t-1$)
-2. National Account data with periods from 2010 to the actual end ($t$)
+1. EGSS data with periods starting in 2010 and ending at the actual end ($t$)
+2. National Account data with periods from 2010 to the year which has to be predicted ($t+1$)
 3. Data set with currency conversion rates for countries outside the Euro-zone
 
 
@@ -74,11 +74,11 @@ data("dat_egssBas")
 dat_egssBas
 ```
 
-Missing values are empty cells which are replaced by "NA" (not available) in R. The data-set is not complete, i.e. not all possible combinations of the classification variables are available. Moreover, the structure of the data set is not consistent over time, i.e. the structure for EGSS data before 2013 is different to the structure after 2012. This is true for the division of type-variables. A complete and fully consistent data set (regarding the hierarchies, not the observation values) is created with the function *loadEGSS* (see below). 
+Missing values are empty cells which are replaced by the value "NA" (not available) in R. The data-set is not complete, i.e. not all possible combinations of the classification variables are available. Moreover, the structure of the data set regarding the division of the variable type ("ty") is not consistent over time -  the structure for EGSS data before 2013 differs from the structure for years 2013 and beyond. A complete and fully consistent data set (regarding the hierarchies, not the observation values) is created with the function **loadEGSS** (see below). 
 
 ## Data from National Accounts
 
-National accounts data is needed to calculate relative^[in relation to national accounts] EGSS values for each hierarchical level. These relative values - and not the nominal data - are used for extra- and interpolation of the data. 
+National accounts data is needed to calculate relative EGSS values^[relative to national accounts data] for each hierarchical level. These relative values - and not the nominal data - are used for extra- and interpolation of the data. 
 
 Data from national accounts is structured as follows:
 
@@ -96,14 +96,14 @@ The level of detail is predominantly the same as for the EGSS-data set. However,
 
 ## Currency conversion 
 
-Data set containing the currency conversion rates for non-Euro zone counties^[BG, CZ, DK, UK, HR, HU, PL, RO, SE]. The conversion rates are needed for all years which are used in the data set of national accounts. 
+Data set containing the currency conversion rates for non-Euro zone counties^[BG, CZ, DK, UK, HR, HU, PL, RO, SE]. The conversion rates are needed for all years from 2010 to the year which has to be predicted ($t+1$). 
 
 # Data processing
-This is an explanation of all available functions provided in the *egssGF* Package. Most of these functions have to be executed in the right sequential order to perform gap filling.
+This is an explanation of all available functions provided in the **egssGF Package**. Most of these functions have to be executed in the right sequential order to perform gap filling.
 
 ## loadEGSS.R
 
-The function **loadEGSS()** converts the EGSS-flat file to an R data-table. In a further step missing hierarchy levels are completed and the consistency of the data set concerning the division of the type variable is established. The input file has to be available in "MDT"-flat format. The following steps are performed:
+The function **loadEGSS()** converts the EGSS-flat file to an R data-table. In a further step missing hierarchy levels are completed (with NA-values) and the consistency of the data set concerning the division of the type variable is established. The input file has to be available in "MDT"-flat format. The following steps are performed:
 
 1. Conversion of national currency values to Euro values
 2. Standardisation of "ty"-variable:
@@ -116,14 +116,14 @@ The function **loadEGSS()** converts the EGSS-flat file to an R data-table. In a
     * 29 Ceparema codes (with aggregates)
     * 8 ty-codes and 4 ty-codes respectively (indic_pi="EXP")
 4. Cells with Zeros and obs_status="L" (not applicable) are set to NA
-5. Creation of a variable **"orig"** indicating if the observation value (obs_value) has been reported (orig=TRUE) or not (orig=FALSE). If obs_value was other than missing then "orig" was set to TRUE, i.e. all zeroes were taken as originally reported neglecting that some countries use zeros for indication of missingness.^[This makes the iterative fitting procedure challenging because original reported values are protected against adjustment and if too many values are protected the fitting procedure will not converge. To circumvent this problem the protection of zero values was released in the iterative fitting procedure].
+5. Creation of a variable **"orig"** indicating if the observation value (obs_value) has been reported (orig=TRUE) or not (orig=FALSE). If obs_value was other than missing then **"orig"** was set to TRUE, i.e. all zeroes were taken as originally reported neglecting that some countries use zeros for indication of missingness.^[This makes the iterative fitting procedure challenging because original reported values are protected against adjustment and if too many values are protected the fitting procedure will not converge. To circumvent this problem the protection of zero values was released in the iterative fitting procedure]
 
 The output of this function is an R-data-table of complete EGSS data with all combinations for 1996 to the actual year for 28 countries - 26 EU-counties plus Swizerland and Turkey (Malta and Cyprus are missing).
 
 ### Arguments of the function
 
-+ *x*: R data-table of the EGSS base file, which has to be available in .csv format^[The .csv-File is transformed to an R data table by the command fread("xxxx.csv")]
-+ *y*: R data-table with currency conversion rates for non-eurozone countries
++ **x**: R data-table of the EGSS base file, which has to be available in .csv format^[The .csv-File is transformed to an R data table by the command fread("xxxx.csv")]
++ **y**: R data-table with currency conversion rates for non-eurozone countries
 
 ### Output
 
@@ -131,7 +131,7 @@ The output of this function is an R-data-table of complete EGSS data with all co
 
 ## loadNA.R
 
-Extrapolation of EGSS-data was not done on nominal data but based on nominal EGSS data relative to national account data. Extrapolated ratios were then applied to available national-account data. After conversion of national currency values to Euro-values EGSS-ratios were calculated for each Year, Country and Variable in relation to (ranking according to availability):
+Extrapolation of EGSS-data was not done on nominal data but based on nominal EGSS data relative to national account data. Extrapolated ratios were then applied to available national-account data. After conversion of national currency values to Euro EGSS-ratios were calculated for each Year, Country and Variable in relation to (ranking according to availability):
 
 1. the total of the respective detailed NACE-Code (e.g. NACE-levels C31-C33, E36,...) per EU-country and year
       + NACE-Codes E37, E38 and E39 were not available for national accounts, therefore each of these
@@ -205,7 +205,8 @@ account data
 
 ## screenData.R
 
-The function **screenData()** can be applied to the base data set at any completion level (unedited (not gap filled version) or edited (completed version) form). Visualisation of the completness-level of the data set. Four different plots are available,
+The function **screenData()** offers visualisation of the completness-level of the data set.
+It can be applied to the EGSS-data set at any completion level (raw data or gap-filled data). Four different plots are available,
 
 1. country times year
 2. country times Nace
@@ -233,14 +234,14 @@ knitr::include_graphics("Pictures/ScreenDataEx1.PNG")
 
 ## tables.R
 
-This function produces a Nace x Ceparema Matrix with the indication which values have been reported by the country and which have not been reported. Additionally the marinal distribution of the table is compared with the sum of the values in each row/column. If the diff column and row are different from zero, there is no consistency between the column/row total and the sum of inividual row/column entries.
+The function **tables()** produces a visualisation of the basic Nace x Ceparema Matrix with information on the reporting status of every single cell (green stars indicate original reported cells). Additionally the reported marginal distribution of the table is compared to the sum of reported values and estimated values^[if the function is applied to a gap filled version of the EGSS-data set, otherwise no estimated values are available.] in each row/column. The variable "diff" indicates wheter row and column distributions are consistent with microdata.
 
 ### Arguments of the function
 
-+ *x*: data set to display
-+ *per*: period for which the data matrix should be shown
-+ *g*: country code
-+ *v*: variable code
++ **x**: data set to display
++ **per**: period for which the data matrix should be shown
++ **g**: country code
++ **v**: variable code
 
 > Austrian production for 2015
 
@@ -250,7 +251,15 @@ knitr::include_graphics("Pictures/TablesAT2015.PNG")
 
 ## tables1.R
 
-This function visualizes in one table the consistency for all dimensions of the table, i.e. consistency of row totals to total total, consistency of colum total of TOT_CEPA and TOT_CREMA to total total, consistency of row sums of TOT_CEPA and TOT_CREMA to row-total, consistency of sum of CEPA1 to CEPA9 per row to TOT_CEPA of the respective row, consistency of fum of CREMA10 to CREMA16 per row to TOT_CREMA of the respective row, consistency of column totals of all ceparema codes (including TOT_CEPA and TOT_CREMA) to column totals.
+The function **tables1()** visualizes consistency for all dimensions of the table. 
+
+- row total with sum of ceparema 1 to 16 for each nace-section (D1_16)
+- cepa totals per nace-section with sum of cepa 1 to 9 for respective nace-section (D1_9)
+- crema totals per nace-section with sum of crema 10 to 16 for respective nace-section (D10_16)
+- cepa totals with ceparema totals per nace-section with total (DTotC)
+- column total over all nace-sections for each ceparema code including cepa 1-9, crema 10-16 and total (DIFF)
+
+
 
 ### Arguments of the function
 
@@ -327,7 +336,10 @@ For each method there exist two models: one with additive errors and one with mu
 
 ## extraPol.R
 
-If at least one reported value is available for a specific hierarchy level (year x country x variable^[indic_pi]) we use exponetial smoothing state space models to estimate backwards and forwards. However, if only one observation is available or if the variance of all observations is equal to zero then this very one value is extrapolated to every period needed. Otherwise the exponential smoothing procedure **ETS** from the forecast package ^[Hyndman et al] is used to generate the estimated values. These models allow to include intercept terms, trend components and seasonal components. However, in our case no seasonal component was included because of the periodicity of the data (yearly). 
+Extrapolations (forecasting and backcasting) and interpolations on each hierarchy level are done by exponential smoothing state space models (**ETS** from the forecast package).^[Hyndman et al] These models allow to include intercept terms, trend components and seasonal components. However, in our case no seasonal component was included because of the periodicity of the data (yearly). 
+
+If only one observation is available for a specific hierarchy level or if the variance of all observations is equal to zero then this very value is extrapolated to every period needed. 
+
 
 ### Arguments of the function
 The function has only one argument (x), which is the base level hierarchy^[Nace-codes x Ceparema codes without any aggregates, i.e. cells within the data matrix without row and column sums.] of the EGSS-data set enriched with national account data (output of function loadNA)
@@ -337,12 +349,14 @@ The function has only one argument (x), which is the base level hierarchy^[Nace-
 
 The imputation of missing values is done in two steps:
 
-1. Extrapolation and Intrapolation of Levels for which at least one observation 
+(1) Extrapolation and Intrapolation of Levels for which at least one observation 
    is available
-2. Mean Imputation of Levels for which no observation is available.
+(2) Mean Imputation of hierarchy-levels for which no observation is available.
 
-The gap filling for case 1 is done with the methodology described above (Innovations state space models for exponential smoothing). All calculations are based on relative values (observed data related to value of the concrete data cell from national accounts) not on absolute values. The projected ratios are then applied to the relevant values of national accounts. Therefore a possible trend in the extrapolated data can be achieved by an extrapolated trend component in the ratios and/or by a trending behaviour of the national account data. 
-The estimation of missing data for case two is also based on ratios based on national account data. For case two the value of EGSS relative to national accounts is calculated for each year, country and variable. If for a certain hierarchy level no single value is available for the whole time span considered for a certain country and variable the median share of EGSS data to national accounts data for all available countries is imputed for the missing country^[Realiter, the number of nonmissing countries will differ from year to year. This will possibly effect the median value. In case no country delivered a specific hierarchy level the median is set to zero.]. This median share is then applied to the relevant national account data of the country considered. Data from national accounts must be available for every country, year and variable in order to produce a complete data matrix.
+The gap filling for case (1) is done with the methodology described above (Innovations state space models for exponential smoothing). All calculations are based on relative values (EGSS-data relative to data from national accounts) instead of absolute values^[This means the variation of estimated values is partly caused by the variation of national account data.]. The projected ratios are then applied to the relevant values of national accounts. Therefore a possible trend in the extrapolated data can be achieved by an extrapolated trend component in the ratios and/or by a trending behaviour of the national account data. \
+
+
+The estimation of missing data for case two is also based on ratios to national account data. In this case the value of EGSS relative to national accounts is calculated for each year, country and variable. If for a certain hierarchy level no single value is available for the whole time span considered for a certain country and variable the median share of EGSS data to national accounts data for all available countries is imputed for the missing country^[Realiter, the number of nonmissing countries will differ from year to year. This will possibly effect the median value. In case no country delivered a specific hierarchy level the median is set to zero.]. This median share is then applied to the relevant national account data of the country considered. Data from national accounts must be available for every country, year and variable in order to produce a complete data matrix.
 
 The imputation discribed in this section is done sequentially, starting 
 
@@ -360,18 +374,18 @@ The function has only one argument (x) beeing the EGSS-data set enriched with na
 
 ## plotData.R 
 
-The imputation of missing data is visualised with the function *plotData*. For each hierarchy level reported and estimated values can be compared with estimates from earlier versions of the data set. 
+The imputation of missing data is visualised with the function **plotData()**. For each hierarchy level reported and estimated values can be compared with estimates from earlier versions of the data set. 
 
 ### Arguments of the function
 
-+ *x*: base data set 
-+ *y*: edited data set 
-+ *geoC*: country code (defaults to all EU-countries)
-+ *varC*: Variable indic_pi (defaults to Production)
-+ *nC*: Nace code 
-+ *cC*: Ceparema code 
++ **x**: base data set 
++ **y**: edited data set 
++ **geoC**: country code (defaults to all EU-countries)
++ **varC**: Variable indic_pi (defaults to Production)
++ **nC**: Nace code 
++ **cC**: Ceparema code 
 
-In the plots data points from the x-data set are labled as "observed", those of the y-data set are labeled as "estimated". Therefore, if the x is set to the base data set with no gap filling, original reported values can be compared with any level of imputed data (original estimates vs. all levels of iterative fitted values).
+In the plots data points from the x-data set are labled as "observed", those of the y-data set are labeled as "estimated". Therefore, if x is set to the base data set with no gap filling, original reported values can be compared with any level of imputed data (original estimates vs. all levels of iterative fitted values).
 
 > Example Plot - originally reported data with initial gap filled data
 
@@ -381,11 +395,11 @@ knitr::include_graphics("Pictures/PlotData2.PNG")
 
 # Consistency
 
-The estimation of missing values in the gap filling procedure is done independently on each aggregation level. Therefore the consistency of the data set is not guaranteed. In fact, most aggregates will deviate from the sum of the respective sub-aggregates. One way of establishing consistency in the data matrix is to omit all totals and instead calculate totals from the bottom level cells. This is done in the procedure *aggTotals*. However, reported totals constitute an important information which should not be omitted. Therefore the consistency of the complete data set is established in an iterative procedure.
+The estimation of missing values in the gap filling procedure is done independently on each aggregation level. Therefore the consistency of the data set is not guaranteed. In fact, most aggregates will deviate from the sum of the respective sub-aggregates. One way of establishing consistency in the data matrix is to omit all totals and instead calculate totals from the bottom level cells. This is done in the procedure **aggTotals()**. However, reported totals constitute an important information which should not be omitted. Therefore the consistency of the complete data set is established in an iterative procedure.
 
 ## iterFit.R
 
-The function *iterFit* establishes consistency within the gap-filled data set by iterative proportional fitting (raking). 
+The function **iterFit()** establishes consistency within the gap-filled data set by iterative proportional fitting (raking). 
 
 ### Calculation of adjustment factors
 
@@ -405,7 +419,7 @@ In order to adjust each cell value in the Nace x Ceparema Matrix to the relevant
 
 > Example
 
-In the following table TOT_CEPA and TOT_CREMA for each Nace-Level are summed to fit the relevant total of TOT_CEPA and TOT_CREMA. In the first row the value for TOT_CEPA (lcode=xx_xxx_100, lcode=xx_xxx_200 for TOT_CREMA) for employment in Austria in the year 2010 for all Nace-codes was 91037.680. This value was originally reported by the country (orig=TRUE). From the 21 sub-aggregates 11 have been estimated (nEst=11) and for 10 Nace-codes the value for TOT_CEPA has been reported by the country. If the 11 estimated values and the 10 reported values are summed up the respective results are 37441.691 and 51892.570. The sum of these two values is 89334.26 which is slightly higher than the reported aggregat. Therefore the estimated values have to be downweighted. The original reported values stay unchanged as long as sumEst <= obs_value.
+In the following table TOT_CEPA and TOT_CREMA for each Nace-Level are summed to fit the relevant total of TOT_CEPA and TOT_CREMA. In the first row the value for TOT_CEPA (lcode=xx_xxx_100, lcode=xx_xxx_200 for TOT_CREMA) for employment in Austria in the year 2010 for all Nace-codes was 91037.680. This value was originally reported by the country (orig=TRUE). From the 21 sub-aggregates 11 have been estimated (nEst=11) and for 10 Nace-codes the value for TOT_CEPA has been reported by the country. If the 11 estimated values and the 10 reported values are summed up the respective results are 37441.691 and 51892.570. The sum of these two values is 89334.26 which is slightly lower than the reported aggregat. Therefore the estimated values have to be upweighted. The original reported values stay unchanged as long as sumEst <= obs_value.
 
 ```{r, echo=FALSE, out.width="100%", fig.align = "center"}
 knitr::include_graphics("Pictures/iterFitt.PNG")
@@ -451,16 +465,16 @@ knitr::include_graphics("Pictures/iterFitt.PNG")
 
 ### Arguments of the function
 
-The function *iterFit* hast the following arguments:
+The function **iterFit()** hast the following arguments:
 
-- *x*: data set to be made consistent 
-- *z*: argument for merging the sub-aggregate to the aggregate 
-- *lc*: code of hierarchy level to merge sub-aggregate values to relevent aggregate 
-- *nLevel*: Nace-level of the aggregate 
-- *nLevel1*: Nace-level of the sub-aggregate 
-- *cLevel*: Ceparema-level of the aggregate 
-- *cLevel1*: Ceparema-level of the sub-aggregate 
-- *mod*: protection level of original reported values 
+- **x**: data set to be made consistent 
+- **z**: argument for merging the sub-aggregate to the aggregate 
+- **lc**: code of hierarchy level to merge sub-aggregate values to relevent aggregate 
+- **nLevel**: Nace-level of the aggregate 
+- **nLevel1**: Nace-level of the sub-aggregate 
+- **cLevel**: Ceparema-level of the aggregate 
+- **cLevel1**: Ceparema-level of the sub-aggregate 
+- **mod**: protection level of original reported values 
 
 ## genConv.R
 
@@ -500,7 +514,7 @@ The function has one argument (x) which is the gap-filled data matrix (output of
 
 ## results.R
 
-This function generates the final output table. The format is oriented on the input flat file. The function creates a list with 3 list-elements:
+Thi function  **results()** generates the final output table. The format is oriented on the input flat file. The function creates a list with 3 list-elements:
 
 1. EGSS-data table for all countries, years and variables
 2. EGSS-data table for EU28 (all years and variables)

@@ -8,8 +8,8 @@
 #'                   C26, C27, C28, C29_C30, C31-C33, D, E, E36, E37-E39, F, G, H, I, J, K, L,
 #'                   M, M69_M70, M71, M72, M73-M75, N, O, P, Q, R, S, T, U
 #'
-#' @usage data(natAcc)
-#' @name natAcc
+#' @usage data(natAccN)
+#' @name natAccN
 #'
 #'
 NULL

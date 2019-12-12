@@ -7,16 +7,14 @@
 #' @return EGSS-data set made consistent in all dimensions
 #'
 #' @examples
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016)
-#' datComp <- gapFill(x = datEgssNA)
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+#' datComp <- gapFill(x = datAll)
 #' genConv(x = datComp, n = 10)
 #'
 #' @import data.table
 #' @export
-genConv <- function(x,n){
+genConv <- function(x, n){
   nace_r2 <- ceparema <- CEPA1 <- CEPA2 <- CEPA3 <- CEPA4 <- CEPA5 <- CEPA6 <- 'CEPA7-9' <- NULL
   TOT_CEPA <- CREMA10 <- CREMA11 <- CREMA13 <- CREMA14 <- CREMA12_15_16 <- TOT_CREMA <- TOTAL <- NULL
   agg7 <- copy(x)

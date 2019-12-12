@@ -18,11 +18,9 @@ EGSS-data set made consistent in all dimensions
 Generation of final (consistent) EGSS data-matrices from gap-filled EGSS data.
 }
 \examples{
-data("dat_egssBas")
-data("natAcc")
-datEgss <- loadEGSS(x = dat_egssBas)
-datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016)
-datComp <- gapFill(x = datEgssNA)
+datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+datComp <- gapFill(x = datAll)
 genConv(x = datComp, n = 10)
 
 }

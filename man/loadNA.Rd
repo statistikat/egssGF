@@ -4,32 +4,40 @@
 \alias{loadNA}
 \title{Load and Compile National Accounts Data. Merge NA-Data with EGSS-data}
 \usage{
-loadNA(x, y, toEst, t1 = "TOT_EGSS")
+loadNA(x, y, z, toEst, t1 = "TOT_EGSS")
 }
 \arguments{
-\item{x}{National Accounts File for Variable Production, Exports, Value added and Hours worked as R data table}
+\item{x}{National Accounts File for Variable Production, Exports, Value added
+and Hours worked as R data table}
 
 \item{y}{EGSS-Data set created with Function loadEGSS()}
 
+\item{z}{Currency transformation rates}
+
 \item{toEst}{Year to be predicted}
 
-\item{t1}{Type variable for which the analysis should be performed. Possible values are TOT_EGSS (default),
-MKT, NMKT, ANC, C_REP, ES_CS, OWN_USE and REST}
+\item{t1}{Type variable for which the analysis should be performed. Possible
+values are TOT_EGSS (default), MKT, NMKT, ANC, C_REP, ES_CS, OWN_USE
+and REST}
 }
 \value{
-Complete EGSS-Data Matrix enriched with National Account Data and respective ratios of
-EGSS-Vaues to National Account Data
+Complete EGSS-Data Matrix enriched with National Account Data and
+respective ratios of EGSS-Vaues to National Account Data
 }
 \description{
-Loads Data from National Accounts for all 28 EU-Countries and the Variables Production, Value Added,
-Exports and Hours worked (instead of Empoyees - no full-time equivalents are available). In a second step the
-national account data set is merged with the EGSS-data set produced with loadEGSS. For all time series a relative observation
-value is calculated relative to the "nearest" national account aggregate which is continuously greater than
-zero for the whole time series.
+Loads Data from National Accounts for all 28 EU-Countries and the Variables
+Production, Value Added, Exports and Hours worked (instead of Empoyees - no
+full-time equivalents are available). Variables with values in national currency
+are transformed to Euro values (conversion rates have to be delivered as input
+variable z). In a second step the national account data set is merged with the
+EGSS-data set produced with loadEGSS. For all time series a relative observation
+value is calculated relative to the "nearest" national account aggregate which
+is continuously greater than zero for the whole time series.
 }
 \details{
-An identification code is created in order to simlify the access to different aggregation levels. This code is a 17 digit
-character variable composed of (Example: AT_EMP_A00_00_000) :
+An identification code is created in order to simlify the access to different
+aggregation levels. This code is a 17 digit character variable composed of
+(Example: AT_EMP_A00_00_000) :
 \enumerate{
 \item two digits for country code followed by underscore (e.g. AT_,BE_,...)
 \item three digits for variable (e.g. EMP_, OUT_,...)
@@ -50,12 +58,12 @@ character variable composed of (Example: AT_EMP_A00_00_000) :
 }
 \itemize{
 \item 110-190: Environmental Protection Cepa 1-6
-\item 200-260: Ressource Management CrEMa 10-16 -- with subcategories 111 and 112 (without 110) and 131,132,133 (without 130)
+\item 200-260: Ressource Management CrEMa 10-16 -- with subcategories 111 and 112
+(without 110) and 131,132,133 (without 130)
 }
 }
 \examples{
-data("dat_egssBas")
-data("natAcc")
-datEgss <- loadEGSS(x = dat_egssBas)
-loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
+datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+datAll
 }

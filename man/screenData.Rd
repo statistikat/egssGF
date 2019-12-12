@@ -4,15 +4,23 @@
 \alias{screenData}
 \title{Screening of EGSS-data}
 \usage{
-screenData(x, g = c("AT", "BE", "BG", "CH", "CZ", "DE", "DK", "EE", "EL",
-  "ES", "FI", "FR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "NL", "PL",
-  "PT", "RO", "SE", "SI", "SK", "TR", "UK"), v = c("PROD", "VA", "EXP",
-  "EMP"), per = "ALL", n2 = c("A", "B", "C", "D", "E", "F", "G", "H",
-  "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U"),
-  cep = c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7",
-  "CEPA8", "CEPA9", "CREMA10", "CREMA11", "CREMA12", "CREMA13", "CREMA14",
-  "CREMA15", "CREMA16"), t1 = c("ANC", "MKT", "NMKT", "OWN_USE"),
-  p = 1, val = 1, ia = FALSE)
+screenData(
+  x,
+  g = c("AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR", "HR",
+    "HU", "IE", "IT", "LT", "LU", "LV", "MT", " NL", "PL", "PT", "RO", "SE", "SI", "SK",
+    "UK"),
+  v = c("PROD", "VA", "EXP", "EMP"),
+  per = "ALL",
+  n2 = c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P",
+    "Q", "R", "S", "T", "U"),
+  cep = c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7", "CEPA8",
+    "CEPA9", "CREMA10", "CREMA11", "CREMA12", "CREMA13A", "CREMA13B", "CREMA13C",
+    "CREMA14", "CREMA15", "CREMA16"),
+  t1 = c("ANC", "MKT", "NMKT", "OWN_USE"),
+  p = 1,
+  val = 1,
+  ia = FALSE
+)
 }
 \arguments{
 \item{x}{EGSS-data table created from flat file and/or adapted with various gap-filling functions.}
@@ -52,11 +60,11 @@ Summery Tables, Graphs
 Visualisation of the share of missing data in the EGSS data matrix
 }
 \examples{
-data <- loadEGSS(dat_egssBas)
-screenData(data)
-screenData(data,per=2015,p=2)
-screenData(data,per=2015,p=3,t1="TOT_EGSS")
-screenData(data,per=2015,g="AT",p=4)
-screenData(data,per=2015,g=c("AT","BE"),p=4)
+datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+screenData(datEgss)
+screenData(datEgss,per=2015,p=2)
+screenData(datEgss,per=2015,p=3,t1="TOT_EGSS")
+screenData(datEgss,per=2015,g="AT",p=4)
+screenData(datEgss,per=2015,g=c("AT","BE"),p=4)
 
 }

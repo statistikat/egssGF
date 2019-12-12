@@ -26,20 +26,21 @@
 #' @param y Currency transformation rates
 #' @return Completed EGSS-Data Matrix
 #'
-#' @examples loadEGSS(dat_egssBas, currency2018)
+#' @examples loadEGSS(x = dat_egssBas, y = currency)
 #' @import data.table
 #' @export
-loadEGSS <- function(x, y){
-  ty <- . <- obs_value <- geo <- time <- nace_r2 <- ceparema <- indic_pi <- obs_status <- obs_conf <- NULL
-  obs_comment <- obs_gen <- yyyy <- unit.x <- obs_value.x <- obs_value.y <- obs_status.x <- NULL
-  obs_conf.x <- obs_comment.x <- orig <- NULL
+loadEGSS <- function(x, y) {
+  ty <- . <- obs_value <- geo <- time <- nace_r2 <- ceparema <- indic_pi <- NULL
+  obs_status <- obs_conf <- obs_comment <- obs_gen <- yyyy <- unit.x <- NULL
+  obs_value.x <- obs_value.y <- obs_status.x <- obs_conf.x <- obs_comment.x <- NULL
+  orig <- rate <- NULL
 
   # Conversion of national currency to Euro
   setkey(x, geo, time)
   setkey(y, geo, time)
   x0 <- merge(x, y, all.x = TRUE)
   x0[indic_pi == "EMP", rate := 1]
-  x0[, ":=" (obs_value = ifelse(is.na(rate), obs_value, obs_value/rate))]
+  x0[, ":=" (obs_value = ifelse(is.na(rate), obs_value, obs_value / rate))]
   #-----------------------------------------------------------------------------
   # Completion of Dataset                                                                          Start(1)
   #--------------------------------------------------------------------------------------------------------
@@ -86,16 +87,13 @@ loadEGSS <- function(x, y){
   setkey(dat1,geo,yyyy,indic_pi,nace_r2,ceparema,ty)
   setkey(base_struc,geo,yyyy,indic_pi,nace_r2,ceparema,ty)
   dat2 <- merge(dat1,base_struc,all.y=TRUE)
-  #key(dat1)
 
   # Cells with Zeros and obs_status="L" (not applicable) are set to NA
   dat2[obs_value==0 & obs_status=="L",obs_value:=NA]
   dat2[,":=" (orig=FALSE)]
   dat2[!is.na(obs_value),orig:=TRUE]
   # Calculate proportion of actual value to top aggregate (per country and variable) for entire data-set
-  #bb <- dat2[nace_r2=="TOTAL" & ceparema=="TOTAL" & ty=="TOT_EGSS", .(geo,time,indic_pi,nace_r2,ceparema,ty,bas=obs_value) ]
-  #dat2 <- merge(dat2,bb,all.x=TRUE)
-  #dat2[,":=" (obs_valueRel=ifelse(is.na(bas) | bas==0,0,obs_value/bas))]
+
   ####################################################################################
   return(dat2[])
 }

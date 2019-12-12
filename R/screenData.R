@@ -27,12 +27,12 @@
 #' @return Summery Tables, Graphs
 #'
 #' @examples
-#' data <- loadEGSS(dat_egssBas)
-#' screenData(data)
-#' screenData(data,per=2015,p=2)
-#' screenData(data,per=2015,p=3,t1="TOT_EGSS")
-#' screenData(data,per=2015,g="AT",p=4)
-#' screenData(data,per=2015,g=c("AT","BE"),p=4)
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' screenData(datEgss)
+#' screenData(datEgss,per=2015,p=2)
+#' screenData(datEgss,per=2015,p=3,t1="TOT_EGSS")
+#' screenData(datEgss,per=2015,g="AT",p=4)
+#' screenData(datEgss,per=2015,g=c("AT","BE"),p=4)
 #'
 #' @import data.table
 #'         ggplot2

@@ -4,8 +4,15 @@
 \alias{iterFit}
 \title{Iterative fitting of extrapolated and imputed data to respective available aggregate numbers}
 \usage{
-iterFit(x, z, lc = c(8, 0, 0), nLevel = "TOTAL", cLevel = "TOTAL",
-  nLevel1 = "TOTAL", cLevel1 = "TOTAL")
+iterFit(
+  x,
+  z,
+  lc = c(8, 0, 0),
+  nLevel = "TOTAL",
+  cLevel = "TOTAL",
+  nLevel1 = "TOTAL",
+  cLevel1 = "TOTAL"
+)
 }
 \arguments{
 \item{x}{Complete EGSS-data set, i.e. data-set with no gaps. This data-set is generated with the
@@ -37,11 +44,9 @@ Complete and consistent EGSS-data set regarding the respective aggregation level
 Iterative fitting of extrapolated and imputed data to respective available aggregate numbers
 }
 \examples{
-data("dat_egssBas")
-data("natAcc")
-datEgss <- loadEGSS(x = dat_egssBas)
-datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
-datComp <- gapFill(x = datEgssNA)
+datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+datComp <- gapFill(x = datAll)
 agg1 <- iterFit(datComp,z=NULL,lc=c(6,0,0),nLevel1=LETTERS[1:21])
 agg2a <- iterFit(agg1,z=NULL,lc=c(6,0,0),cLevel1=c("TOT_CEPA", "TOT_CREMA"))
 agg2b <- iterFit(agg2a,z=c("ceparema","TOT_CEPA"),lc=c(6,0,0), cLevel=c("TOT_CEPA"),

@@ -14,19 +14,16 @@
 #' @return Time series plots of EGSS-data with different completion version
 #'
 #' @examples
-#' library(data.table)
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
-#' datComp <- gapFill(x = datEgssNA)
-#' plotData(x = datEgssNA, y = datComp)
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+#' datCompl <- gapFill(x = datAll)
+#' plotData(x = datAll, y = datCompl)
 #' @import data.table
 #' @import ggplot2
 #' @export
-plotData <- function(x,y,geoC="ALL",varC="PROD",nC="TOTAL",cC="TOTAL"){
+plotData <- function(x, y, geoC = "ALL", varC = "PROD", nC = "TOTAL", cC = "TOTAL") {
   nace_r2 <- ty <- ceparema <- . <- yyyy <- code <- obs_value <- geo <- indic_pi <- NULL
-  if(geoC=="ALL"){
+  if(any("ALL" %in% geoC)){
     geoC <- c("AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES",
             "FI", "FR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL",
             "PT", "RO", "SE", "SI", "SK", "UK")
@@ -46,13 +43,11 @@ plotData <- function(x,y,geoC="ALL",varC="PROD",nC="TOTAL",cC="TOTAL"){
   linetype = rep(c('dotted', 'solid'),2)
   ggplot(data = p10, aes(x = yyyy, y = obs_value, linetype = source, color = source)) +
     theme_linedraw() +
-    geom_line(alpha=0.8) +
+    geom_line(alpha=0.8, na.rm = TRUE) +
     facet_wrap(~ code, scales="free") +
-    geom_point() +
+    geom_point(na.rm = TRUE) + 
     scale_linetype_manual(values = linetype) +
     scale_color_manual(values = c("brown1","deepskyblue4")) +
     xlab("Time") + ylab("Observation Value")
-  #ggplot(data = p10, mapping = aes(x = yyyy, y = obs_value, color = source)) + theme_linedraw() +
-  #  geom_line(alpha=0.8) + facet_wrap(~ code, scales="free") + geom_point() +
-  #  scale_color_tableau(palette = "Classic Blue-Red 6")
+
 }

@@ -1,3 +1,6 @@
 ^\.Rproj\.user$
 ^div$
 ^.*\.Rproj$
+^doc$
+^Meta$
+.RData

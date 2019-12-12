@@ -9,17 +9,16 @@
 #' If only one value is available for the  whole time series or if the variance of
 #' the variable is equal to zero for the whole time series forecasts and backcasts
 #' are set to this very value. In any other case extrapolation (and intrapolation)
-#' is performed with ETS models from the forecast-package (see description in the vignette).
+#' is performed with ETS models from the forecast-package (see description in the 
+#' vignette).
 #'
 #'
 #' @param x EGSS-Data set created with Function loadNA()
 #' @return completed list element for aggregation list
 #'
 #' @examples
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' datAll <- loadNA(x = natAcc, y = datEgss, toEst = 2016)
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
 #' testSer <- datAll[code=="AT_EMP_A00_00_000",]
 #' extraPol(testSer)
 #' @import data.table
@@ -38,25 +37,6 @@ extraPol <- function(x){
     } else if(length(x[!is.na(x)])==1 | var(x[!is.na(x)])==0){
        ff <- cbind(yyyy,obs_valueEX = rep(mean(x[!is.na(x)]),nObs))
     } else {
-      # Case 1: EGSS-observation for period to estimate is available - interpolate Missing values and Backcasting
-      # Case 2: EGSS-observation for period to estimate not available (standard): interpolate missing values,
-      # Forecasting and Backcasting
-          # if(is.na(x[nObs])){         # if obs to estimate is already available no forecast has to be generated
-          #    x1 <- x[1:(nObs-1)]
-          #    ii <- which(is.na(x1))
-          #    yf <- ts(x1,start=c(sY,1),freq=1)
-          #    modf <- ets(yf,model="ZZN",na.action = "na.interp")      # NA-values in-between are interpolated
-          #    fitted <- as.numeric(modf$fitted)
-          #    x1[ii] <- fitted[ii]
-          #    fc <- cbind(time,obs_valueEX = c(x1,predict(modf)$mean[1]))
-          # } else{
-          #     ii <- which(is.na(x))
-          #     yf <- ts(x,start=c(sY,1),freq=1)
-          #     modf <- ets(yf,model="ZZN",na.action = "na.interp",lambda="auto")
-          #     fitted <- as.numeric(modf$fitted)
-          #     x[ii] <- fitted[ii]
-          #     fc <- cbind(time,obs_valueEX = x)
-          # }
           naV <- which(!is.na(x))
           firstObs <- naV[1]                                    # firstObservation which is not NA
           lastObs <- naV[length(naV)]                           # last Observation which is not NA
@@ -83,9 +63,6 @@ extraPol <- function(x){
           x1[ii] <- fitted[ii]
           ff <- cbind(yyyy,obs_valueEX=c(as.numeric(bc),x1,as.numeric(fc)))
        }
-   #    if(!(any(x<0)) & fc<0 ){        # negative Values only for series which had already negatives in the past
-   #       fc <- 0.00
-   #    }
    ff <- as.data.table(ff)
 })
 

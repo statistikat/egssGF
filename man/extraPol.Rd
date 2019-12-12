@@ -23,13 +23,12 @@ models (ETS) from the forecast package.
 If only one value is available for the  whole time series or if the variance of
 the variable is equal to zero for the whole time series forecasts and backcasts
 are set to this very value. In any other case extrapolation (and intrapolation)
-is performed with ETS models from the forecast-package (see description in the vignette).
+is performed with ETS models from the forecast-package (see description in the
+vignette).
 }
 \examples{
-data("dat_egssBas")
-data("natAcc")
-datEgss <- loadEGSS(x = dat_egssBas)
-datAll <- loadNA(x = natAcc, y = datEgss, toEst = 2016)
+datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
 testSer <- datAll[code=="AT_EMP_A00_00_000",]
 extraPol(testSer)
 }

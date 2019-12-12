@@ -25,17 +25,15 @@
 #'           -specific medians)
 #'
 #' @examples
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
-#' datCompl <- gapFill(x = datEgssNA)
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+#' datCompl <- gapFill(x = datAll)
 #'
 #' @import data.table
 #' @importFrom stats median
 #' @export
 #'
-gapFill <- function(x){
+gapFill <- function(x) {
   orig <- nace_r2 <- ceparema <- obs_value <- yyyy <- code <- . <- obs_valueEX <- NULL
   rev_val <- obs_gen <- naINDIC <- obsMean <- obs_value_relINDIC <- indic_pi <- NULL
   geo <- ty <- obs_value_rel <- obs_status <- obs_conf <- obs_value_relINDIC <- NULL
@@ -61,18 +59,7 @@ gapFill <- function(x){
               obs_gen = ifelse(orig == FALSE & !is.na(obs_valueEX), "EXTRA", 
                                obs_gen))]
   xBas[,":=" (obs_value_relINDIC = ifelse(naINDIC==0, NA, obs_value/naINDIC))]
-  ## statistics for calculation of median - how many country results are available ----
-  #xBasN <- xBas[!is.na(obs_value_relINDIC), nMean := .N, by = .(yyyy, indic_pi, 
-  #                                                              nace_r2, ceparema)]
-  #cat("Median for Production is at least based on ", min(xBasN[indic_pi=="PROD",nMean],
-  #                                                      na.rm = TRUE), "Countries \n")
-  #cat("Median for Employees is at least based on ", min(xBasN[indic_pi=="EMP",nMean],
-  #                                                      na.rm = TRUE), "Countries \n")
-  #cat("Median for Value added is at least based on ", min(xBasN[indic_pi=="VA",nMean],
-  #                                                      na.rm = TRUE), "Countries \n")
-  #cat("Median for Exports is at least based on ", min(xBasN[indic_pi=="EXP",nMean],
-  #                                                      na.rm = TRUE), "Countries \n")
-  ##-----------------------------------------------------------------------------------
+
   xBas[, obsMean := median(obs_value_relINDIC, na.rm = TRUE), by = .(yyyy, indic_pi,
                                                                      nace_r2, ceparema)]
   # if no country delivered a certain position the estimated value for this cell will be zero
@@ -96,22 +83,7 @@ gapFill <- function(x){
               obs_gen = ifelse(orig == FALSE & !is.na(obs_valueEX), "EXTRA", obs_gen))]
 
   xCep[,":=" (obs_value_relINDIC = ifelse(naINDIC==0, NA, obs_value/naINDIC))]
-  
-  ## statistics for calculation of median - how many country results are available ----
-  #xCepN <- xCep[!is.na(obs_value_relINDIC), nMean := .N, by = .(yyyy, indic_pi, 
-  #                                                              nace_r2, ceparema)]
-  #xCepN[, xx := paste0(yyyy,substr(code,4,17))]
-  #test <- xCepN[, .SD[.N], by = xx]
-  #test[indic_pi=="EXP",]
-  #cat("Median for Production is at least based on ", min(xCepN[indic_pi=="PROD",nMean],
-  #                                                       na.rm = TRUE), "Countries \n")
-  #cat("Median for Employees is at least based on ", min(xCepN[indic_pi=="EMP",nMean],
-  #                                                      na.rm = TRUE), "Countries \n")
-  #cat("Median for Value added is at least based on ", min(xCepN[indic_pi=="VA",nMean],
-  #                                                        na.rm = TRUE), "Countries \n")
-  #cat("Median for Exports is at least based on ", min(xCepN[indic_pi=="EXP",nMean],
-  #                                                    na.rm = TRUE), "Countries \n")
-  
+
   xCep[, obsMean := median(obs_value_relINDIC, na.rm = TRUE), by = .(yyyy, indic_pi,
                                                                      nace_r2, ceparema)]
   xCep[is.na(obsMean), obsMean := 0]

@@ -8,11 +8,9 @@
 #' the value, country, year and variable of the maximum deviation
 #'
 #' @examples
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
-#' datComp <- gapFill(x = datEgssNA)
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+#' datComp <- gapFill(x = datAll)
 #' resPrelim <- genConv(datComp, 50)
 #' iterControl(resPrelim)
 #'

@@ -14,37 +14,11 @@
 
 #'
 #' @examples
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
-#' datComp <- gapFill(x = datEgssNA)
-#' agg1 <- iterFit(datComp,z=NULL,lc=c(6,0,0),nLevel1=LETTERS[1:21])
-#' agg2a <- iterFit(agg1,z=NULL,lc=c(6,0,0),cLevel1=c("TOT_CEPA", "TOT_CREMA"))
-#' agg2b <- iterFit(agg2a,z=c("ceparema","TOT_CEPA"),lc=c(6,0,0), cLevel=c("TOT_CEPA"),
-#'              cLevel1=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9"))
-#' agg2c <- iterFit(agg2b,z=c("ceparema","TOT_CREMA"),lc=c(6,0,0), cLevel=c("TOT_CREMA"),
-#'              cLevel1=c("CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16"))
-#' agg3 <- iterFit(agg2c,z = c("ceparema","TOTAL"), nLevel=LETTERS[1:21], nLevel1=LETTERS[1:21],
-#'                 cLevel1=c("TOT_CEPA", "TOT_CREMA"))
-#' # fit column-total of tot_cepa and tot_crema to tot_cepa and tot_crema over all naces
-#' agg4 <- iterFit(agg3,z = c("nace_r2","TOTAL"),lc=c(6,15,17),nLevel1=LETTERS[1:21],
-#'                 cLevel=c("TOT_CEPA", "TOT_CREMA"), cLevel1=c("TOT_CEPA", "TOT_CREMA"))
-#' # fit row-totals of cepa1-cepa79 to row-total of tot_cepa
-#' agg5 <- iterFit(agg4,z=c("ceparema","TOT_CEPA"), nLevel=LETTERS[1:21],nLevel1=LETTERS[1:21],
-#'                 cLevel=c("TOT_CEPA"),
-#'                 cLevel1=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9"))
-#' # fit row-totals of crema10-crema14 to row-total of tot_crema
-#' agg6 <- iterFit(agg5,z=c("ceparema","TOT_CREMA"), nLevel=LETTERS[1:21],nLevel1=LETTERS[1:21],
-#'                 cLevel=c("TOT_CREMA"),
-#'                 cLevel1=c("CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16"))
-#' # fit colum totals of ceparema to total ceparemas over all naces
-#' agg7 <- iterFit(agg6,z=c("nace_r2","TOTAL"),lc=c(6,15,17),nLevel1=LETTERS[1:21],
-#'          cLevel=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9","TOT_CEPA",
-#'                     "CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16","TOT_CREMA"),
-#'          cLevel1=c("CEPA1", "CEPA2", "CEPA3", "CEPA4", "CEPA5", "CEPA6", "CEPA7-9","TOT_CEPA",
-#'                     "CREMA10", "CREMA11", "CREMA13", "CREMA14", "CREMA12_15_16","TOT_CREMA"))
-#' tables(agg7, per = 2015, g = "AT", v = "PROD")
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+#' datComp <- gapFill(x = datAll)
+#' resPrelim <- genConv(datComp, 20)
+#' tables(resPrelim, per = 2015, g = "AT", v = "PROD")
 #' @import data.table
 #' @import formattable
 #' @export

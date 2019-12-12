@@ -4,8 +4,7 @@
 \alias{plotData}
 \title{Visualisation of original together with imputed data for EGSS}
 \usage{
-plotData(x, y, geoC = "ALL", varC = "PROD", nC = "TOTAL",
-  cC = "TOTAL")
+plotData(x, y, geoC = "ALL", varC = "PROD", nC = "TOTAL", cC = "TOTAL")
 }
 \arguments{
 \item{x}{EGSS-Base data set (ouput of loadNA.R)}
@@ -30,11 +29,8 @@ originally reported by the member country. These are then compared with the esti
 which can be any data set of raw-gap filled data or data which had been adapted by the iterative fitting procedure.
 }
 \examples{
-library(data.table)
-data("dat_egssBas")
-data("natAcc")
-datEgss <- loadEGSS(x = dat_egssBas)
-datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
-datComp <- gapFill(x = datEgssNA)
-plotData(x = datEgssNA, y = datComp)
+datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+datCompl <- gapFill(x = datAll)
+plotData(x = datAll, y = datCompl)
 }

@@ -4,10 +4,12 @@
 \alias{loadEGSS}
 \title{Load and Compile EGSS-data}
 \usage{
-loadEGSS(x)
+loadEGSS(x, y)
 }
 \arguments{
 \item{x}{R Data Table (EGSS Basis File in Flat Format)}
+
+\item{y}{Currency transformation rates}
 }
 \value{
 Completed EGSS-Data Matrix
@@ -17,6 +19,7 @@ Loads EGSS Base File, completes and harmonises data file over periods.
 }
 \details{
 \enumerate{
+\item Conversion of national currency values to Euro values
 \item Input File has to be available in the "MDT"-flat format
 \item Standardisation of "ty"-Variable:
 \itemize{
@@ -35,8 +38,12 @@ Loads EGSS Base File, completes and harmonises data file over periods.
 \item 8 ty-codes and 4 ty-codes respectively (indic_pi="EXP")
 }
 \item Cells with Zeros and obs_status="L" (not applicable) are set to NA
+\item Creation of a variable \strong{orig} indicating if the observation value
+(obs_value) has been reported (orig=TRUE) This means that obs_value is
+other than missing. (all zeroes are taken as reported). If the variable
+obs_value is missing than orig is set to FALSE.
 }
 }
 \examples{
-loadEGSS(dat_egssBas)
+loadEGSS(x = dat_egssBas, y = currency)
 }

@@ -18,9 +18,7 @@ list element with consistent EGSS-data for all countries and EU totals
 Generation of final EGSS data-matrices from iterative fitted data.
 }
 \examples{
-data("dat_egssBas")
-data("natAcc")
-datEgss <- loadEGSS(x = dat_egssBas)
-datAll <- loadNA(x = natAcc, y = datEgss, toEst = 2016)
+datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
 
 }

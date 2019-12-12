@@ -18,11 +18,9 @@
 #' @return Complete and consistent EGSS-data set regarding the respective aggregation level.
 #'
 #' @examples
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' datEgssNA <- loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
-#' datComp <- gapFill(x = datEgssNA)
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+#' datComp <- gapFill(x = datAll)
 #' agg1 <- iterFit(datComp,z=NULL,lc=c(6,0,0),nLevel1=LETTERS[1:21])
 #' agg2a <- iterFit(agg1,z=NULL,lc=c(6,0,0),cLevel1=c("TOT_CEPA", "TOT_CREMA"))
 #' agg2b <- iterFit(agg2a,z=c("ceparema","TOT_CEPA"),lc=c(6,0,0), cLevel=c("TOT_CEPA"),
@@ -50,7 +48,6 @@
 
 iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="TOTAL",
                     cLevel1="TOTAL"){
-  #x <- copy(agg6)
   nace_r2 <- ceparema <- lcode <- code <- value <- orig <- . <- yyyy <- obs_value <- value_FALSE <- NULL
   value_TRUE <- N_FALSE <- N_TRUE <- sumRep <- sumEst <- factorEst <- factorRep <- korrObsV <- NULL
   obs_value.x <- obs_value.y <- v1 <- v2 <- oVal <- geo <- indic_pi <- ty <- obs_status <- NULL
@@ -61,7 +58,6 @@ iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="
   x01[,":=" (value=ifelse(value<0 & orig==FALSE,0.0001,value))]
   x01[,":=" (value=ifelse(value<0 & !(substr(lcode,4,6)=="VAD"),0.0001,value))]
 
-  #x01[,":=" (orig=ifelse(abs(value)<0.0002,FALSE,orig))]
   x01a <- x01[,lapply(.SD,sum,na.rm=TRUE),by=c("lcode","yyyy","orig"),.SDcols=c("value")]
   x01b <- x01[!is.na(value),.N,by=c("lcode","yyyy","orig")]
   x02 <- merge(x01a,x01b)
@@ -86,67 +82,29 @@ iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="
   # Notice: obs_value cannot be NA if orig==TRUE
 
   testAll[, ":=" (factorEst = NA_real_, factorRep = NA_real_, korrObsV = 0)]
-  #testAll[obs_value<0 & orig==FALSE, ":=" (obs_value = 0, korrObsV = 1)]
-  #testAll[obs_value<0 & indic_pi %in% c("PROD","EMP","EXP"), ":=" (obs_value = 0, korrObsV = 1)] ##?? restrict to orig=TRUE?
 
   testAll[orig==FALSE & obs_value<sumRep, ":=" (obs_value = sumRep, korrObsV = 1)]
   testAll[orig==FALSE & !is.na(sumEst) & !(sumEst>0) & sumRep>0, ":=" (obs_value = sumRep, korrObsV = 1)]
   testAll[orig==TRUE & obs_value < 0.0002 & sumRep>0, ":=" (obs_value = sumRep, korrObsV = 1)]
-  #testAll[orig==TRUE & obs_value<sumRep, ":=" (obs_value = sumRep, koffObsV = 1)]
-
-  #testAll[orig==TRUE & obs_value==0 & sumEst>0 & !(sumRep>0), ":=" (obs_value = sumEst, korrObsV = 1)] #, orig=FALSE)]
-  #testAll[orig==TRUE & obs_value==0 & sumEst>0 & sumRep>0, ":=" (obs_value = sumEst+sumRep, korrObsV = 1)]#, orig=FALSE)]
-
-  # realiter is.na(obs_value) should not be observed (is observed, because naINDIC is na for some countries)
-  #testAll[is.na(obs_value) & sumEst >= 0 & sumRep >= 0, ":=" (obs_value = sumEst+sumRep, korrObsV = 1)]
-  #testAll[is.na(obs_value) & sumEst >= 0 & sumRep < 0, ":=" (obs_value = sumEst, korrObsV = 1)]
-  #testAll[is.na(obs_value) & sumEst < 0 & sumRep >= 0, ":=" (obs_value = sumRep, korrObsV = 1)]
-  #testAll[is.na(obs_value) & sumEst < 0 & sumRep < 0, ":=" (obs_value = 0, korrObsV = 1)]
-  #testAll[is.na(obs_value) & is.na(sumEst) & sumRep >= 0, ":=" (obs_value = sumRep, korrObsV = 1)]
-  #testAll[is.na(obs_value) & is.na(sumEst) & sumRep < 0, ":=" (obs_value = 0, korrObsV = 1)]
-  #testAll[is.na(obs_value) & sumEst >= 0 & is.na(sumRep), ":=" (obs_value = sumEst, korrObsV = 1)]
-  #testAll[is.na(obs_value) & sumEst < 0 & is.na(sumRep), ":=" (obs_value = 0, korrObsV = 1)]
-  #testAll[is.na(obs_value) & is.na(sumEst) & is.na(sumRep), ":=" (obs_value = 0, korrObsV = 1)]
-
+  
   #################################### obs_value reported ###################################################
   testAll[is.na(sumEst) & is.na(sumRep),  ":=" (factorEst = 0, factorRep = 0)]
-  testAll[is.na(sumEst) & sumRep < 0,     ":=" (factorEst = 0, factorRep = 1)] #(factorEst = 0, factorRep = 0)]
+  testAll[is.na(sumEst) & sumRep < 0,     ":=" (factorEst = 0, factorRep = 1)] 
   testAll[is.na(sumEst) & sumRep == 0,    ":=" (factorEst = 0, factorRep = 1)]
-  testAll[is.na(sumEst) & sumRep > 0,     ":=" (factorEst = 0, factorRep = 1)]  ####
+  testAll[is.na(sumEst) & sumRep > 0,     ":=" (factorEst = 0, factorRep = 1)] 
   testAll[is.na(sumEst) & sumRep > 0 & orig==TRUE & obs_value > 0,
                                           ":=" (factorEst = 0, factorRep = obs_value/sumRep)]
   #----------------------------------------------------------------------------------------------------------
   testAll[sumEst == 0 & is.na(sumRep),    ":=" (factorEst = 1, factorRep = 0)]
   testAll[sumEst == 0 & sumRep < 0,       ":=" (factorEst = 1, factorRep = 0)]
   testAll[sumEst == 0 & sumRep == 0,      ":=" (factorEst = 1, factorRep = 1)]
-  testAll[sumEst == 0 & sumRep > 0,       ":=" (factorEst = 1, factorRep = 1)]  ####
+  testAll[sumEst == 0 & sumRep > 0,       ":=" (factorEst = 1, factorRep = 1)] 
   testAll[sumEst == 0 & sumRep > 0 & orig == TRUE & obs_value > 0,
                                           ":=" (factorEst = 1, factorRep = obs_value/sumRep)]
   #----------------------------------------------------------------------------------------------------------
 
-  # # 1+2
-  # testAll[sum(sumEst, sumRep, na.rm = TRUE) == obs_value, ":=" (factorEst = 1, factorRep = 1)]
-  # # 3,4 und 5
-  # testAll[sumRep == obs_value & orig == TRUE, ":=" (factorEst = 0, factorRep = 1)]
-  # testAll[sumRep == obs_value & orig == FALSE, ":=" (factorEst = 1, factorRep = 1, obs_value = sum(sumRep, sumEst),
-  #                                                  korrObsV = 1)]
-  # # 6,7 und 8
-  # testAll[sumRep > obs_value & orig == TRUE, ":=" (factorEst = 0, factorRep = obs_value/sumRep)]
-  # testAll[sumRep > obs_value & orig == FALSE, ":=" (factorEst = 1, factorRep = 1, obs_value = sum(sumRep, sumEst),
-  #                                                 korrObsV = 1)]
-  # # 9+10
-  # testAll[sumRep < obs_value, ":=" (factorEst = (obs_value-sumRep)/sumEst, factorRep = 1)]
-  # # 11
-  # testAll[sumEst == 0 & sumRep < obs_value & orig == TRUE, ":=" (factorEst = 1, factorRep = obs_value/sumRep)]
-  # testAll[sumEst == 0 & sumRep < obs_value & orig == FALSE, ":=" (factorEst = 1, factorRep = 1, obs_value = sumRep,
-  #                                                               korrObsV = 1)]
-  #testAll[sumEst > 0 & sumRep > 0 & sum(sumEst,sumRep) > obs_value & orig == TRUE,
-  #        ":=" (factorEst = 1, factorRep = 1, obs_value = sum(sumRep, sumEst), korrObsV = 1)]
-
-  # eins
-
   ##########################################################################################################################
-  testAll[!(sumEst == 0) & sumRep < 0,    ":=" (factorEst = (obs_value-sumRep)/sumEst, factorRep = 1)]  #factorRep = 0
+  testAll[!(sumEst == 0) & sumRep < 0,    ":=" (factorEst = (obs_value-sumRep)/sumEst, factorRep = 1)]
   testAll[!(sumEst == 0) & sumRep == 0,   ":=" (factorEst = obs_value/sumEst, factorRep = 1)]
   testAll[!(sumEst == 0) & is.na(sumRep), ":=" (factorEst = obs_value/sumEst, factorRep = 0)]
   testAll[!(sumEst == 0) & sumRep > 0 & obs_value > 0 & obs_value >= sumRep,
@@ -154,11 +112,6 @@ iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="
 
   testAll[!(sumEst == 0) & sumRep > 0 & obs_value > 0 & obs_value < sumRep & orig == TRUE,
                                           ":=" (factorEst = 0, factorRep = obs_value/sumRep)]   ## A
-
-  ## possibly -------------------------------------------------------------------------------------------------------
-  ##testAll[sumEst > 0 & sumRep > 0 & obs_value > 0 & obs_value < sumRep & orig == TRUE,
-  ##        ":=" (factorEst = obs_value/(sumEst+sumRep), factorRep = obs_value/(sumEst+sumRep))]  ## A alternativ
-  ##-----------------------------------------------------------------------------------------------------------------
 
   # ----------------------------------------------------------------------------------------------------------------
   testAll[!(sumEst == 0) & sumRep > 0 & obs_value > 0 & obs_value < sumRep & orig == FALSE,
@@ -171,17 +124,9 @@ iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="
                                           ":=" (factorEst = 0, factorRep = 1)] #####
   #-----------------------------------------------------------------------------------------------------------------
 
-
   # Output of maximal Adjustment factors for manual control
   extAdjNA <- testAll[,.(yyyy,lcode,factorEst)]
   extAdjOri <- testAll[,.(yyyy,lcode,factorRep)]
-
-  #cat("\n","\n","Maximal and minimal Adjustment Factors for estimated Values","\n")
-  #print(extAdjNA[order(extAdjNA$factorEst,decreasing = TRUE)[1:5]])
-  #print(extAdjNA[order(extAdjNA$factorEst,decreasing = FALSE)[1:5]])
-  #cat("\n","Maximal Adjustment Factors for reported Values","\n")
-  #print(extAdjOri[order(extAdjOri$factorRep,decreasing = TRUE)[1:5]])
-  #print(extAdjOri[order(extAdjOri$factorRep,decreasing = FALSE)[1:5]])
 
   testAll0 <- testAll[,.(yyyy,lcode,factorEst,factorRep)]
   if(is.null(z)){
@@ -213,7 +158,6 @@ iterFit <- function(x, z, lc=c(8,0,0), nLevel="TOTAL", cLevel="TOTAL", nLevel1="
 
   yy <- merge(y,testAll1,all.x=TRUE)
   yy[,":=" (obs_value=ifelse(is.na(oVal),obs_value,oVal))]
-  #y <- y[,.(code,geo,yyyy,indic_pi,nace_r2,ceparema,ty,unit,obs_value,obs_status,obs_conf,obs_comment,obs_gen,orig,naINDIC)]
   yy <- yy[,.(code,geo,yyyy,indic_pi,nace_r2,ceparema,ty,unit,obs_value,obs_status,obs_conf,obs_comment,obs_gen,orig,naINDIC)]
   yy[, ":=" (obs_value=ifelse(obs_value==0,0.0001,obs_value))]
   return(yy[])

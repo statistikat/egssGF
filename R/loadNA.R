@@ -41,16 +41,17 @@
 #'         respective ratios of EGSS-Vaues to National Account Data
 #'
 #' @examples
-#' data("dat_egssBas")
-#' data("natAcc")
-#' datEgss <- loadEGSS(x = dat_egssBas)
-#' loadNA(x = natAcc, y = datEgss, toEst = 2016, t1 = "TOT_EGSS")
+#' datEgss <- loadEGSS(x = dat_egssBas, y = currency)
+#' datAll <- loadNA(x = natAccN, y = datEgss, z = currency, toEst = 2016, t1 = "TOT_EGSS")
+#' datAll
 #' @import data.table
 #' @export
-loadNA <- function(x, y, z, toEst, t1 = "TOT_EGSS"){
-  time <- nace_r2 <- value <- yyyy <- indic_pi <- geo <- nace1 <- ceparema <- z0 <- ty <- z1 <- z2 <- NULL
-  z3 <- code <- naBASE <- na1DIG <- naINDIC <- naGEO <- rev_val <- naINDIC_av <- na1DIG_av <- naBASE_av <- NULL
-  obs_value <- . <- obs_value_rel <- obs_status <- obs_conf <- obs_comment <- obs_gen <- orig <- lcode <- NULL
+loadNA <- function(x, y, z, toEst, t1 = "TOT_EGSS") {
+  time <- nace_r2 <- value <- yyyy <- indic_pi <- geo <- nace1 <- ceparema <- NULL
+  z0 <- ty <- z1 <- z2 <- z3 <- code <- naBASE <- na1DIG <- naINDIC <- naGEO <- NULL
+  rev_val <- naINDIC_av <- na1DIG_av <- naBASE_av <- obs_value <- . <- NULL
+  obs_value_rel <- obs_status <- obs_conf <- obs_comment <- obs_gen <- NULL 
+  orig <- lcode <- rate <- NULL
   x <- x[time <= toEst,]
   
   
@@ -74,8 +75,7 @@ loadNA <- function(x, y, z, toEst, t1 = "TOT_EGSS"){
   #----------------------------------------------------------------------------
 
   # Nace Totals for each Variable (PROD,VA,EMP and EXP) and Year
-    #xTot <- x[,lapply(.SD,sum,na.rm=TRUE),by=c("time","geo"),.SDcols="value"]
-    #xTot[,":=" (valueTOT=value,value=NULL)]
+
     xTot <- x0[,lapply(.SD,sum,na.rm=TRUE),by=c("yyyy","indic_pi"),.SDcols="value"]
     xTot[,":=" (naGEO=value,value=NULL)]
   # Nace Totals for each Country, Year and Variable
@@ -89,8 +89,6 @@ loadNA <- function(x, y, z, toEst, t1 = "TOT_EGSS"){
   # Total Nace and Nace-1Digit
   y <- y[yyyy>2009 & yyyy<=toEst,]
 
-  #setkey(y,geo,time)
-  #setkey(xTot,geo,time)
   setkey(y,indic_pi,yyyy)
   setkey(xTot,indic_pi,yyyy)
   y0 <- merge(y,xTot,all.x=TRUE)
@@ -163,7 +161,6 @@ loadNA <- function(x, y, z, toEst, t1 = "TOT_EGSS"){
   # each code are based on the lowest continuous (for all years) available aggregation 
   # level for that very code from national account data.
   naRef <- y3[, lapply(.SD,function(x){
-     #all(!is.na(x))
      all(x>0)
     }), by=c("code"),.SDcols=c("naBASE", "na1DIG", "naINDIC", "naGEO")]
   naRef[,":=" (naBASE_av = naBASE, na1DIG_av = na1DIG, naINDIC_av = naINDIC,
